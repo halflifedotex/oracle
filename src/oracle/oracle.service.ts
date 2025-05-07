@@ -13,10 +13,17 @@ export class OracleService implements OnModuleInit {
   async onModuleInit() {
     const apiKey = this.configService.get('MORALIS_API_KEY', { infer: true });
     if (!apiKey) {
+      console.error('MORALIS_API_KEY is not defined in environment variables');
       throw new Error('MORALIS_API_KEY is not defined in environment variables');
     }
-    await Moralis.start({ apiKey });
-    console.log('Moralis SDK Started');
+    try {
+      console.log('Attempting to start Moralis SDK...');
+      await Moralis.start({ apiKey });
+      console.log('Moralis SDK Started successfully.');
+    } catch (error) {
+      console.error('Failed to start Moralis SDK:', error);
+      throw error; // Re-throw the error to ensure NestJS knows the module failed to initialize
+    }
   }
 
   async getMetrics() {

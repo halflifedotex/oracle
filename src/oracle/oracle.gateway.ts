@@ -1,17 +1,22 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, WsResponse, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { OracleService } from './oracle.service';
-import { CreateOracleDto } from './dto/create-oracle.dto';
-import { UpdateOracleDto } from './dto/update-oracle.dto'
-@WebSocketGateway()
-export class OracleGateway {
-  constructor(private readonly oracleService: OracleService) {}
+import { Socket } from 'socket.io';
+import { Logger } from '@nestjs/common';
 
-  @SubscribeMessage('createOracle')
-  create(@MessageBody() createOracleDto: CreateOracleDto) {
-    return this.oracleService.create(createOracleDto);
+@WebSocketGateway(8000)
+export class OracleGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly oracleService: OracleService, private readonly logger: Logger) { }
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected ${client.id}`);
   }
-  @SubscribeMessage('getMetrics')
-  getMetrics() {
-    return this.oracleService.getMetrics();
+  handleConnection(client: Socket) {
+    this.logger.log(`Client connected ${client.id}`);
+  }
+  @SubscribeMessage('metrics')
+  getMetrics(): WsResponse<any> {
+    return {
+      event: 'metrics',
+      data: this.oracleService.getMetrics(),
+    };
   }
 }
