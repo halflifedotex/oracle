@@ -27,18 +27,10 @@ export class OracleService implements OnModuleInit {
   }
 
   async getMetrics() {
-    const chainName = this.configService.get('CHAIN', { infer: true });
-    if (!chainName) {
-      throw new Error('CHAIN is not defined in environment variables');
-    }
-
-    const chainKeys = Object.keys(EvmChain) as (keyof typeof EvmChain)[];
-    if (!chainKeys.includes(chainName as keyof typeof EvmChain)) {
-      throw new Error(`Invalid chain: ${chainName}. Valid chains are: ${chainKeys.join(', ')}`);
-    }
-    
-    const chain = EvmChain[chainName as keyof typeof EvmChain];
-
-    return { message: `Metrics from ${chain.name}` };
+    const metrics = await Moralis.EvmApi.token.getTokenPrice({
+      address: "0x7fE0244A02630C7cf649c07339aCceCc6f2976b4",
+      chain: EvmChain.BASE.hex
+    });
+    return { message: `Metrics from ${EvmChain.BASE.name}`, data: metrics };
   }
 }

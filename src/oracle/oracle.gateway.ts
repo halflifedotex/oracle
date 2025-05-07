@@ -3,7 +3,11 @@ import { OracleService } from './oracle.service';
 import { Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway(8000)
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class OracleGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly oracleService: OracleService, private readonly logger: Logger) { }
   handleDisconnect(client: Socket) {
@@ -13,10 +17,11 @@ export class OracleGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client connected ${client.id}`);
   }
   @SubscribeMessage('metrics')
-  getMetrics(): WsResponse<any> {
+  async getMetrics(): Promise<WsResponse<any>> {
+    const metricsData = await this.oracleService.getMetrics();
     return {
       event: 'metrics',
-      data: this.oracleService.getMetrics(),
+      data: metricsData,
     };
   }
 }
