@@ -1,99 +1,129 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Halflife Oracle
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**Halflife Oracle** streams on‑chain data, fuses it into a real‑time **Token Lifespan Index (TLI)**, and publishes the score on‑chain and over WebSockets every block.
+Traders can build perpetual “time” derivatives, exchanges can price listing risk, and risk desks can see a single 0‑100 heartbeat for any ERC‑20 they care about.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+### ✨ Key features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+* **5 s refresh‑rate** using Base Flashblocks mini‑blocks.
+* **Multi‑source ETL**—Covalent for holder snapshots, Bitquery & 1inch for liquidity, Santiment for CEX flows, Glassnode‑style dormancy from Substreams.
+* **Gradient‑boosted survival model** trained on 10 k historical token deaths; SHAP weights are published for transparency.
+* **Chainlink‑compatible aggregator** pushes the TLI on‑chain so smart‑contracts can read a single uint256.
+* **Off‑chain WebSocket API** streams the full metric bundle for dashboards and quants.
 
-## Project setup
+---
 
-```bash
-$ npm install
+### 📊 Why these metrics?
+
+| Metric bucket                  | API(s)                                                                              | Why it matters                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Holder growth & churn**      | Covalent `token_holders` ([Covalent][1])                                            | Adoption velocity stalls days before price collapses.                  |
+| **Dormancy / coin‑age**        | Substreams Firehose ([Welcome to Flipside \| Flipside Docs][2])                     | Spikes mean long‑term capital is leaving the network.                  |
+| **Liquidity depth & slippage** | Bitquery DEX GraphQL ([Bitquery][3]) + 1inch `/quote` ([1inch Developer Portal][4]) | Shallow or fragmented liquidity lets a rug pull drain pools in one tx. |
+| **30‑d TVL & LP fees**         | Token Terminal fees API ([Bitquery][5])                                             | Falling fee income shows mercenary LPs are exiting.                    |
+| **CEX inflow/outflow**         | Santiment Exchange Flow ([GitHub][6])                                               | Large inflows mean holders are heading for the exit.                   |
+| **Whale labels**               | Arkham Intelligence API ([Covalent][7])                                             | Single whale deposits often trigger cascades.                          |
+| **NVT sanity check**           | CoinMetrics / CryptoQuant NVT ([Welcome to Flipside \| Flipside Docs][8])           | Flags bubbles where value outruns usage.                               |
+
+Each signal covers a different failure mode—conviction, monetary velocity, liquidity runway, exogenous drains, or valuation heat—so the survival model can learn which matters most in each regime.
+
+---
+
+### 🏗 Architecture
+
+```
+ Flashblocks WS  ─┐
+                 │    ┌───────────────┐
+ Covalent REST   ─┼──▶│ Ingest Layer  │──────────┐
+ Bitquery GQL    ─┤    └───────────────┘          │
+ 1inch REST      ─┤                              ▼
+ Santiment REST  ─┘    ┌──────────────────┐   ┌────────┐
+                           Transform &        Survival
+                      EWMA Normalisation  ─▶  Model
+                        (Rust & DuckDB)       (xgboost)
+                               │                  │
+                               ▼                  │
+                    ┌───────────────────────┐     │
+                    │ Chainlink Aggregator  │◀────┘
+                    └───────────────────────┘
+                               │
+                               ▼
+                    WebSocket / REST API
 ```
 
-## Compile and run the project
+---
+
+### 🚀 Quick start
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/your‑org/halflife‑oracle.git
+cd halflife‑oracle
+cp .env.sample .env      # add API keys from Covalent, Bitquery, 1inch, Santiment
+docker compose up --build
 ```
 
-## Run tests
+* `npm run ingest` – starts the ETL workers
+* `npm run oracle` – posts the TLI to the Chainlink aggregator every block
+* `npm run api` – websockets on `ws://localhost:8080`
 
-```bash
-# unit tests
-$ npm run test
+> **Tip:** Free‑tier limits are plenty for dev: Covalent 5 req/s, Bitquery 100 k GQL points/day, 1inch 1 RPS ([1inch Developer Portal][4]), Flipside 500 query‑seconds/month ([Welcome to Flipside | Flipside Docs][9]).
 
-# e2e tests
-$ npm run test:e2e
+---
 
-# test coverage
-$ npm run test:cov
-```
+### 🧩 Environment variables
 
-## Deployment
+| Key                     | Purpose                     |
+| ----------------------- | --------------------------- |
+| `COVALENT_API_KEY`      | Holder snapshots & balances |
+| `BITQUERY_KEY`          | Liquidity & fee queries     |
+| `ONEINCH_BASE_URL`      | Real‑time slippage          |
+| `SANTIMENT_KEY`         | CEX flow metrics            |
+| `FLIPSIDE_KEY`          | Back‑test SQL jobs          |
+| `CHAINLINK_PRIVATE_KEY` | Signs oracle updates        |
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 📈 Model details
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+* **Feature set:** 17 features across 5 buckets
+* **Algorithm:** Gradient‑boosted survival tree via XGBoost‑Survival
+* **Retrain cadence:** weekly; drift tests run nightly
+* **Explainability:** SHAP plots auto‑published to `docs/model/latest.html`
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+> See `ml/README.md` for training notebooks and hyper‑params.
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+### 🤝 Contributing
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+1. Fork > create feature branch > PR against `dev`.
+2. Run `npm test` (unit) and `make e2e` (Ganache fork) before pushing.
+3. Sign the CLA in `docs/CLA.md`.
 
-## Support
+New ETL adapters are welcome—check `src/ingest/interfaces.ts` for spec.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+### 📜 License
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+MIT — see `LICENSE`.
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-# oracle
+### 🙏 Acknowledgements
+
+This project borrows inspiration and patterns from Chainlink node repos ([GitHub][10]), open‑source oracle demos ([GitHub][6]) and the community tutorials on running decentralized data feeds ([GitHub][11]).
+
+[1]: https://www.covalenthq.com/blog/q1-2023-product-report/?utm_source=chatgpt.com "Q1 2023 Product Update - Covalent HQ"
+[2]: https://docs.flipsidecrypto.xyz/data/data-products/api-sdk-developers/get-started/archive/shroomdk-migration-guide?utm_source=chatgpt.com "ShroomDK Migration Guide - Flipside Docs"
+[3]: https://bitquery.io/blog/ethereum-dex-graphql-api?utm_source=chatgpt.com "Ethereum DEX GraphQL APIs with Examples - Bitquery"
+[4]: https://docs.1inch.io/?utm_source=chatgpt.com "Dev Portal | documentation"
+[5]: https://bitquery.io/labs/graphql?utm_source=chatgpt.com "Blockchain GraphQL APIs - Bitquery"
+[6]: https://github.com/luciamunozdev/Chainlink-Building-an-Oracle/blob/main/README.md?utm_source=chatgpt.com "Chainlink-Building-an-Oracle/README.md at main - GitHub"
+[7]: https://www.covalenthq.com/blog/2022-annual-report/?utm_source=chatgpt.com "2022 Annual Report - A Year of Firsts - Covalent HQ"
+[8]: https://docs.flipsidecrypto.xyz/data/data-products/api-sdk-developers/get-started-1/archive/r?utm_source=chatgpt.com "[LEGACY] R - Flipside Docs"
+[9]: https://docs.flipsidecrypto.xyz/data/data-products/api-sdk-developers/getting-started?utm_source=chatgpt.com "Get Started - Your first API call in < 2 min - Flipside Docs"
+[10]: https://github.com/smartcontractkit/chainlink?utm_source=chatgpt.com "smartcontractkit/chainlink: node of the decentralized oracle ... - GitHub"
+[11]: https://github.com/alejoacosta74/chainlink-node-oracle-demo/blob/master/README.md?utm_source=chatgpt.com "README.md - alejoacosta74/chainlink-node-oracle-demo - GitHub"
