@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { OracleService } from './oracle.service';
-import { OracleController } from './oracle.controller';
+import { OracleGateway } from './oracle.gateway';
 
 @Module({
-  controllers: [OracleController],
-  providers: [OracleService],
+  providers: [OracleGateway, OracleService],
 })
 export class OracleModule {}
