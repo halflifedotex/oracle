@@ -115,15 +115,3 @@ MIT — see `LICENSE`.
 ### 🙏 Acknowledgements
 
 This project borrows inspiration and patterns from Chainlink node repos ([GitHub][10]), open‑source oracle demos ([GitHub][6]) and the community tutorials on running decentralized data feeds ([GitHub][11]).
-
-[1]: https://www.covalenthq.com/blog/q1-2023-product-report/?utm_source=chatgpt.com "Q1 2023 Product Update - Covalent HQ"
-[2]: https://docs.flipsidecrypto.xyz/data/data-products/api-sdk-developers/get-started/archive/shroomdk-migration-guide?utm_source=chatgpt.com "ShroomDK Migration Guide - Flipside Docs"
-[3]: https://bitquery.io/blog/ethereum-dex-graphql-api?utm_source=chatgpt.com "Ethereum DEX GraphQL APIs with Examples - Bitquery"
-[4]: https://docs.1inch.io/?utm_source=chatgpt.com "Dev Portal | documentation"
-[5]: https://bitquery.io/labs/graphql?utm_source=chatgpt.com "Blockchain GraphQL APIs - Bitquery"
-[6]: https://github.com/luciamunozdev/Chainlink-Building-an-Oracle/blob/main/README.md?utm_source=chatgpt.com "Chainlink-Building-an-Oracle/README.md at main - GitHub"
-[7]: https://www.covalenthq.com/blog/2022-annual-report/?utm_source=chatgpt.com "2022 Annual Report - A Year of Firsts - Covalent HQ"
-[8]: https://docs.flipsidecrypto.xyz/data/data-products/api-sdk-developers/get-started-1/archive/r?utm_source=chatgpt.com "[LEGACY] R - Flipside Docs"
-[9]: https://docs.flipsidecrypto.xyz/data/data-products/api-sdk-developers/getting-started?utm_source=chatgpt.com "Get Started - Your first API call in < 2 min - Flipside Docs"
-[10]: https://github.com/smartcontractkit/chainlink?utm_source=chatgpt.com "smartcontractkit/chainlink: node of the decentralized oracle ... - GitHub"
-[11]: https://github.com/alejoacosta74/chainlink-node-oracle-demo/blob/master/README.md?utm_source=chatgpt.com "README.md - alejoacosta74/chainlink-node-oracle-demo - GitHub"
