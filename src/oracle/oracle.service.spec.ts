@@ -15,4 +15,9 @@ describe('OracleService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should get metrics', async () => {
+    const metrics = await service.getMetrics();
+    expect(metrics).toBeDefined();
+  });
 });
