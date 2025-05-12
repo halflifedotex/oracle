@@ -1,8 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/schema/config.jsonc",
   "name": "halflife-oracle",
-  "compatibility_date": "2024-05-12",
-  "compatibility_flags": ["nodejs_compat"],
+
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "compatibility_date": "2024-09-23",
   "main": "./dist/worker.js",
   "build": {
     "command": "npm run build",
@@ -39,15 +42,5 @@
     "local_protocol": "http",
     "upstream_protocol": "https"
   },
-  "minify": true,
-  "node_compat": true,
-  "services": [
-    {
-      "binding": "TIMESCALE_DB",
-      "type": "postgres",
-      "connection_string": {
-        "from_secret": "TIMESCALE_DB_URL"
-      }
-    }
-  ]
+  "minify": true
 } 
