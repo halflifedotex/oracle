@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/schema/config.jsonc",
+  "name": "halflife-oracle",
+  "compatibility_date": "2024-05-12",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./dist/worker.js",
+  "build": {
+    "command": "npm run build",
+    "cwd": ".",
+    "watch_dir": "src"
+  },
+  "site": {
+    "bucket": "./dist",
+    "include": ["**/*"],
+    "exclude": ["**/*.map"]
+  },
+  "env": {
+    "production": {
+      "vars": {
+        "NODE_ENV": "production"
+      }
+    }
+  },
+  "vars": {
+    "NODE_ENV": "development"
+  },
+  "triggers": {
+    "crons": []
+  },
+  "routes": [
+    {
+      "pattern": "halflife-oracle.*.workers.dev/*",
+      "zone_name": "workers.dev",
+      "custom_domain": false
+    }
+  ],
+  "dev": {
+    "port": 3000,
+    "local_protocol": "http",
+    "upstream_protocol": "https"
+  },
+  "minify": true,
+  "node_compat": true,
+  "services": [
+    {
+      "binding": "TIMESCALE_DB",
+      "type": "postgres",
+      "connection_string": {
+        "from_secret": "TIMESCALE_DB_URL"
+      }
+    }
+  ]
+} 
