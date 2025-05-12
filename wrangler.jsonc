@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/schema/config.jsonc",
-  "name": "halflife-oracle",
+  "name": "oracle",
 
   "compatibility_flags": [
     "nodejs_compat"
@@ -32,7 +32,7 @@
   },
   "routes": [
     {
-      "pattern": "halflife-oracle.*.workers.dev/*",
+      "pattern": "oracle.*.workers.dev/*",
       "zone_name": "workers.dev",
       "custom_domain": false
     }
@@ -42,5 +42,11 @@
     "local_protocol": "http",
     "upstream_protocol": "https"
   },
-  "minify": true
+  "minify": true,
+  "external": [
+    "class-validator",
+    "class-transformer",
+    "@nestjs/microservices",
+    "@nestjs/microservices/microservices-module"
+  ]
 } 

@@ -16,7 +16,7 @@ async function bootstrap() {
   return expressApp;
 }
 
-export default {
+const worker = {
   async fetch(request: Request, env: any, ctx: ExecutionContext) {
     const app = await bootstrap();
     
@@ -45,4 +45,6 @@ export default {
       });
     });
   },
-}; 
+};
+
+export default worker; 
